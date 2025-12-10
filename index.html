@@ -109,9 +109,163 @@
 </div>
 
 <button class="print-btn" onclick="window.print()">Drucken</button>
-
+ 
 <script>
-function calc(){
- let wnf=+wnf.value, behv=+beh.value, pers=+pers.value, rt=+rt.value, hzv=+hz.value, j=+jng.value;
- let bg=wnf*1.25; bgf.value=bg.toFixed(0); bgf2.innerHTML=bg.toFixed(0);
- let kr=1+((rt-20)*
+// ------------------------------------------------------
+// DOM-Elemente sauber referenzieren (Pflicht ab 2023)
+// ------------------------------------------------------
+const wnf = document.getElementById("wnf");
+const beh = document.getElementById("beh");
+const bgf = document.getElementById("bgf");
+const pers = document.getElementById("pers");
+const rt = document.getElementById("rt");
+const hz = document.getElementById("hz");
+const jng = document.getElementById("jng");
+const ffa = document.getElementById("ffa");
+const sol = document.getElementById("sol");
+const solkwh = document.getElementById("solkwh");
+const solblock = document.getElementById("solblock");
+
+// Einträge
+const pv = document.getElementById("pv");
+const pvb = document.getElementById("pvb");
+const ig = document.getElementById("ig");
+const igb = document.getElementById("igb");
+const sg = document.getElementById("sg");
+const sgb = document.getElementById("sgb");
+const he = document.getElementById("he");
+const heb = document.getElementById("heb");
+const sumEin = document.getElementById("sumEin");
+const sumEinB = document.getElementById("sumEinB");
+
+// Verluste
+const wb = document.getElementById("wb");
+const wbb = document.getElementById("wbb");
+const lf = document.getElementById("lf");
+const lfb = document.getElementById("lfb");
+const anl = document.getElementById("anl");
+const anlb = document.getElementById("anlb");
+const wwl = document.getElementById("wwl");
+const wwlb = document.getElementById("wwlb");
+const wwlossblock = document.getElementById("wwlossblock");
+const bt = document.getElementById("bt");
+const btb = document.getElementById("btb");
+const sumVer = document.getElementById("sumVer");
+const sumVerB = document.getElementById("sumVerB");
+
+// HWB
+const hwbv = document.getElementById("hwbv");
+const enb = document.getElementById("enb");
+const bgf2 = document.getElementById("bgf2");
+const hwbk = document.getElementById("hwbk");
+
+// ------------------------------------------------------
+// Hauptberechnung
+// ------------------------------------------------------
+function calc() {
+
+    // Eingabewerte
+    const wnfV = +wnf.value;
+    const behV = +beh.value / 100;
+    const persV = +pers.value;
+    const rtV = +rt.value;
+    const hzV = +hz.value;
+    const jngV = +jng.value;
+    const solUse = sol.value;
+
+    // BGF
+    const bg = wnfV * 1.25;
+    bgf.value = bg.toFixed(0);
+    bgf2.innerHTML = bg.toFixed(0);
+
+    // Korrekturfaktor Raumwärme
+    const kr = 1 + ((rtV - 20) * 0.02);
+    document.getElementById("krw").value = kr.toFixed(2);
+
+    // Korrektur beheizte Fläche
+    const kbfV = behV;
+    document.getElementById("kbf").value = kbfV.toFixed(2);
+
+    // ---------------------------
+    // Einträge (extrem vereinfachtes Modell)
+    // ---------------------------
+    const pvV = (solUse === "ja" ? +solkwh.value : 0);
+    const igV = persV * 500;
+    const sgV = (ffa.value === "hoch" ? 600 : ffa.value === "mittel" ? 400 : 200);
+    const heV = hzV * jngV;
+
+    pv.innerHTML = pvV;
+    ig.innerHTML = igV;
+    sg.innerHTML = sgV;
+    he.innerHTML = heV.toFixed(0);
+
+    const sumE = pvV + igV + sgV + heV;
+    sumEin.innerHTML = sumE.toFixed(0);
+
+    // ---------------------------
+    // Verluste (stark vereinfachtes Modell)
+    // ---------------------------
+    const wbV = bg * 2.1;
+    const lfV = bg * 1.6;
+    const anlV = heV * 0.1;
+    const btV = bg * 3.2;
+
+    // Warmwasser nur wenn "inkl"
+    const wwlV = (document.getElementById("ww").value === "inkl" ? persV * 500 : 0);
+    wwlossblock.style.display = (wwlV > 0 ? "block" : "none");
+
+    wb.innerHTML = wbV.toFixed(0);
+    lf.innerHTML = lfV.toFixed(0);
+    anl.innerHTML = anlV.toFixed(0);
+    bt.innerHTML = btV.toFixed(0);
+    wwl.innerHTML = wwlV.toFixed(0);
+
+    const sumL = wbV + lfV + anlV + btV + wwlV;
+    sumVer.innerHTML = sumL.toFixed(0);
+
+    // ---------------------------
+    // Balken skalieren
+    // ---------------------------
+    function bar(el, value, max) {
+        el.style.width = (value / max * 100) + "%";
+    }
+    const maxEin = Math.max(sumE, 1);
+    const maxVer = Math.max(sumL, 1);
+
+    bar(pvb, pvV, maxEin);
+    bar(igb, igV, maxEin);
+    bar(sgb, sgV, maxEin);
+    bar(heb, heV, maxEin);
+    bar(sumEinB, sumE, sumE); // Summe = 100 %
+
+    bar(wbb, wbV, maxVer);
+    bar(lfb, lfV, maxVer);
+    bar(anlb, anlV, maxVer);
+    bar(btb, btV, maxVer);
+    bar(wwlb, wwlV, maxVer);
+    bar(sumVerB, sumVer.innerHTML, sumVer.innerHTML); // Summe = 100 %
+
+    // ---------------------------
+    // Heizwärmebedarf
+    // ---------------------------
+    hwbv.innerHTML = (heV / bg).toFixed(1); // Verbrauch
+    enb.innerHTML = (sumE / bg).toFixed(1); // Energiebedarf
+    hwbk.innerHTML = (sumL / bg).toFixed(1); // korrigiert
+}
+
+// ------------------------------------------------------
+// Event-Listener
+// ------------------------------------------------------
+document.querySelectorAll("input, select").forEach(el => {
+    el.addEventListener("input", calc);
+});
+
+// Solare Nutzung sichtbar/unsichtbar
+sol.addEventListener("change", () => {
+    solblock.style.display = (sol.value === "ja" ? "block" : "none");
+    calc();
+});
+
+// Startberechnung
+calc();
+</script>
