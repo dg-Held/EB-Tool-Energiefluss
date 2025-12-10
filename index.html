@@ -4,266 +4,404 @@
 <meta charset="UTF-8" />
 <title>Energiefluss – Final</title>
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;700&display=swap" rel="stylesheet">
+<meta name="robots" content="noindex">
 <style>
- body { font-family: 'Comfortaa', sans-serif; margin: 2cm 0.5cm 1.5cm 2cm; max-width: 17cm; }
- h1, h2 { font-weight: 700; font-size: 16px; }
- label { font-size: 8px; color: #777; display:block; }
- input, select { font-size:12px; width:100%; padding:3px; font-family:'Comfortaa'; }
+ body { font-family: 'Comfortaa', sans-serif; margin: 2cm 0.5cm 1.5cm 2cm; max-width: 17cm; box-sizing: border-box; }
+ h1,h2 { font-weight:700; font-size:16px; margin:0 0 6px 0; }
+ label { font-size:8px; color:#777; display:block; margin-bottom:4px; }
+ input, select { font-size:12px; width:100%; padding:3px; font-family:'Comfortaa'; box-sizing:border-box; }
  input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{ -webkit-appearance:none; margin:0; }
  input[type=range]{ width:100%; }
- .grid5 { display:grid; grid-template-columns: repeat(5,1fr); gap:8px; }
- .grid3 { display:grid; grid-template-columns: 1fr 6cm 1fr; gap:10px; justify-content:center; margin-top:10px; }
+ .grid5 { display:grid; grid-template-columns: repeat(5,1fr); gap:8px; margin-bottom:12px; }
  .block { margin-bottom:12px; }
- .bar-bg { width:100%; height:10px; background:#ccc; } .bar-fill{ height:10px; background:#3ABDC4; }
- .bar-fill-loss{ height:10px; background:#E58A8A; }
+ .bar-bg { width:100%; height:10px; background:#eee; border-radius:6px; overflow:hidden; } 
+ .bar-fill{ height:100%; background:#3ABDC4; width:0; transition:width .25s ease; }
+ .bar-fill-loss{ height:100%; background:#E58A8A; width:0; transition:width .25s ease; }
  .center-graphic{ width:100%; max-width:6cm; height:auto; margin:auto; display:block; }
- .hwb-box{ background:#3ABDC4; color:white; padding:8px; text-align:center; }
- .hwb-values{ display:grid; grid-template-columns: repeat(3,1fr); text-align:center; gap:10px; padding:6px; }
- .print-btn{ margin-top:20px; padding:10px; font-size:14px; }
- @media print { .print-btn{display:none;} }
+ .hwb-box{ background:#3ABDC4; color:white; padding:8px; text-align:center; margin-top:10px; border-radius:6px; }
+ .hwb-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:10px; align-items:center; }
+ .hwb-grid .title { font-size:12px; font-weight:700; }
+ .hwb-grid .value { font-size:18px; font-weight:700; }
+ .print-btn{ margin-top:16px; padding:10px; font-size:14px; cursor:pointer; }
+ @media print { .print-btn{display:none;} body{margin:0;} }
 </style>
 </head>
 <body>
 <h2>Ihr Heizenergiebedarf und die Energieflüsse Ihres Hauses.</h2>
 
 <div class="block">
- <label>Projekttitel</label>
- <input id="proj" type="text" style="font-size:16px;" placeholder="Titel…">
+  <label>Projekttitel</label>
+  <input id="proj" type="text" style="font-size:16px;" placeholder="Titel…">
 </div>
 
 <div class="grid5">
- <div><label>Straße / HNr.</label><input id="str" type="text"></div>
- <div><label>PLZ</label><input id="plz" type="text"></div>
- <div><label>Ort</label><input id="ort" type="text"></div>
- <div></div>
- <div><label>Anmerkungen</label><input id="anm" type="text"></div>
+  <div><label>Straße / HNr.</label><input id="str" type="text"></div>
+  <div><label>PLZ</label><input id="plz" type="text"></div>
+  <div><label>Ort</label><input id="ort" type="text"></div>
+  <div></div>
+  <div><label>Anmerkungen</label><input id="anm" type="text"></div>
 </div>
 
 <h2>Grunddaten</h2>
-<div class="grid5 block">
- <div><label>Wohnnutzfläche (m²)</label><input id="wnf" type="number" value="120"></div>
- <div><label>Beheizt (%)</label><input id="beh" type="range" min="0" max="100" value="90"></div>
- <div><label>BGF (m²)</label><input id="bgf" type="number" readonly></div>
- <div><label>Personen</label><input id="pers" type="number" value="4"></div>
- <div><label>Raumtemperatur (°C)</label><input id="rt" type="number" value="22"></div>
+<div class="grid5">
+  <div>
+    <label>Wohnnutzfläche (m²)</label>
+    <input id="wnf" type="number" value="120" min="1">
+  </div>
+  <div>
+    <label>Beheizt (%)</label>
+    <input id="beh" type="range" min="0" max="100" value="90">
+    <div style="font-size:10px;color:#444;margin-top:4px;" id="behLabel">90%</div>
+  </div>
+  <div>
+    <label>BGF (m²)</label>
+    <input id="bgf" type="number" readonly>
+  </div>
+  <div>
+    <label>Personen</label>
+    <input id="pers" type="number" value="4" min="0">
+  </div>
+  <div>
+    <label>Raumtemperatur (°C)</label>
+    <input id="rt" type="number" value="22" step="0.1">
+  </div>
 </div>
 
-<div class="grid5 block">
- <div><label>Heizenergie (kWh)</label><input id="hz" type="number" value="25000"></div>
- <div><label>Warmwasser</label><select id="ww"><option value="inkl" selected>inkl.</option><option value="exkl">exkl.</option></select></div>
- <div><label>JNG</label><input id="jng" type="number" step="0.01" value="0.85"></div>
- <div><label>Fensterflächen-Anteil</label><select id="ffa"><option value="niedrig">niedrig</option><option value="mittel" selected>mittel</option><option value="hoch">hoch</option></select></div>
- <div><label>Solare Nutzung</label><select id="sol"><option value="nein" selected>Nein</option><option value="ja">Ja</option></select></div>
+<div class="grid5">
+  <div><label>Heizenergie (kWh)</label><input id="hz" type="number" value="25000" min="0"></div>
+  <div><label>Warmwasser</label>
+    <select id="ww"><option value="inkl" selected>inkl.</option><option value="exkl">exkl.</option></select>
+  </div>
+  <div><label>JNG</label><input id="jng" type="number" step="0.01" value="0.85" min="0.01"></div>
+  <div>
+    <label>Fensterflächen-Anteil</label>
+    <!-- slider maps 3000..10000 kWh -->
+    <input id="ffa" type="range" min="0" max="100" value="50">
+    <div id="ffaLabel" style="font-size:10px;color:#444;margin-top:4px;">mittel — 6.000 kWh</div>
+  </div>
+  <div>
+    <label>Solare Nutzung</label>
+    <select id="sol"><option value="nein" selected>Nein</option><option value="ja">Ja</option></select>
+  </div>
 </div>
 
 <div class="block" id="solblock" style="display:none;">
- <label>Solare Nutzung (kWh)</label><input id="solkwh" type="number" value="0">
+  <label>Solare Nutzung (kWh)</label>
+  <input id="solkwh" type="number" value="0" min="0">
 </div>
 
-<div class="grid5 block">
- <div><label>Korrektur Raumwärme</label><input id="krw" readonly></div>
- <div><label>Korrektur beheizte Fläche</label><input id="kbf" readonly></div>
+<div class="grid5">
+  <div><label>Korrektur Raumwärme</label><input id="krw" readonly></div>
+  <div><label>Korrektur beheizte Fläche</label><input id="kbf" readonly></div>
+  <div></div><div></div><div></div>
 </div>
 
 <h2>Energiefluss im Gebäude</h2>
-<div style="display:grid; grid-template-columns: 1fr 6cm 1fr; gap:20px;">
 
- <!-- Einträge -->
- <div>
-   <h3>Einträge</h3>
-   <div class="block"><label>PV / Solarthermie (kWh)</label><div id="pv">0</div><div class="bar-bg"><div id="pvb" class="bar-fill"></div></div></div>
-   <div class="block"><label>Interne Gewinne (kWh)</label><div id="ig">0</div><div class="bar-bg"><div id="igb" class="bar-fill"></div></div></div>
-   <div class="block"><label>Solare Gewinne (kWh)</label><div id="sg">0</div><div class="bar-bg"><div id="sgb" class="bar-fill"></div></div></div>
-   <div class="block"><label>Heizenergie (kWh)</label><div id="he">0</div><div class="bar-bg"><div id="heb" class="bar-fill"></div></div></div>
-   <div class="block"><strong>Summe:</strong> <span id="sumEin">0</span> kWh<div class="bar-bg"><div id="sumEinB" class="bar-fill" style="width:100%"></div></div></div>
- </div>
+<div style="display:grid; grid-template-columns: 1fr 6cm 1fr; gap:20px; align-items:start;">
+  <!-- Einträge -->
+  <div>
+    <h3>Einträge</h3>
 
- <!-- Grafik -->
- <div><img src="Grafik-Stilisiert.svg" class="center-graphic"></div>
+    <div class="block" id="pvblock" style="display:none;">
+      <label>PV / Solarthermie (kWh)</label>
+      <div id="pv">0</div>
+      <div class="bar-bg"><div id="pvb" class="bar-fill"></div></div>
+    </div>
 
- <!-- Verluste -->
- <div>
-   <h3>Verluste</h3>
-   <div class="block"><label>Wärmebrücken (kWh)</label><div id="wb">0</div><div class="bar-bg"><div id="wbb" class="bar-fill-loss"></div></div></div>
-   <div class="block"><label>Lüftung (kWh)</label><div id="lf">0</div><div class="bar-bg"><div id="lfb" class="bar-fill-loss"></div></div></div>
-   <div class="block"><label>Anlage (kWh)</label><div id="anl">0</div><div class="bar-bg"><div id="anlb" class="bar-fill-loss"></div></div></div>
-   <div class="block" id="wwlossblock"><label>Warmwasser (kWh)</label><div id="wwl">0</div><div class="bar-bg"><div id="wwlb" class="bar-fill-loss"></div></div></div>
-   <div class="block"><label>Bauteile (kWh)</label><div id="bt">0</div><div class="bar-bg"><div id="btb" class="bar-fill-loss"></div></div></div>
-   <div class="block"><strong>Summe:</strong> <span id="sumVer">0</span> kWh<div class="bar-bg"><div id="sumVerB" class="bar-fill-loss" style="width:100%"></div></div></div>
- </div>
+    <div class="block">
+      <label>Interne Gewinne (kWh)</label>
+      <div id="ig">0</div>
+      <div class="bar-bg"><div id="igb" class="bar-fill"></div></div>
+    </div>
+
+    <div class="block">
+      <label>Solare Gewinne (kWh)</label>
+      <div id="sg">0</div>
+      <div class="bar-bg"><div id="sgb" class="bar-fill"></div></div>
+    </div>
+
+    <div class="block">
+      <label>Heizenergie (kWh)</label>
+      <div id="he">0</div>
+      <div class="bar-bg"><div id="heb" class="bar-fill"></div></div>
+    </div>
+
+    <div class="block">
+      <strong>Summe:</strong> <span id="sumEin">0</span> kWh
+      <div class="bar-bg"><div id="sumEinB" class="bar-fill" style="width:100%"></div></div>
+    </div>
+  </div>
+
+  <!-- Grafik (fix) -->
+  <div style="text-align:center;">
+    <img src="Grafik-Stilisiert.svg" class="center-graphic" alt="Haus-Grafik">
+  </div>
+
+  <!-- Verluste -->
+  <div>
+    <h3>Verluste</h3>
+
+    <div class="block">
+      <label>Wärmebrücken (kWh)</label>
+      <div id="wb">0</div>
+      <div class="bar-bg"><div id="wbb" class="bar-fill-loss"></div></div>
+    </div>
+
+    <div class="block">
+      <label>Lüftung (kWh)</label>
+      <div id="lf">0</div>
+      <div class="bar-bg"><div id="lfb" class="bar-fill-loss"></div></div>
+    </div>
+
+    <div class="block">
+      <label>Anlage (kWh)</label>
+      <div id="anl">0</div>
+      <div class="bar-bg"><div id="anlb" class="bar-fill-loss"></div></div>
+    </div>
+
+    <div class="block" id="wwlossblock" style="display:none;">
+      <label>Warmwasser (kWh)</label>
+      <div id="wwl">0</div>
+      <div class="bar-bg"><div id="wwlb" class="bar-fill-loss"></div></div>
+    </div>
+
+    <div class="block">
+      <label>Bauteile (kWh)</label>
+      <div id="bt">0</div>
+      <div class="bar-bg"><div id="btb" class="bar-fill-loss"></div></div>
+    </div>
+
+    <div class="block">
+      <strong>Summe:</strong> <span id="sumVer">0</span> kWh
+      <div class="bar-bg"><div id="sumVerB" class="bar-fill-loss" style="width:100%"></div></div>
+    </div>
+  </div>
 </div>
 
 <h2>Abschätzung Heizwärmebedarf (HWB)</h2>
 <div class="hwb-box">
- <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:10px;">
-   <div><strong>HWB<sub>Verbrauch</sub></strong><br><span id="hwbv" style="font-size:18px;">0</span></div>
-   <div><strong>Energiebedarf</strong><br><span id="enb">0</span></div>
-   <div><strong>BGF</strong><br><span id="bgf2">0</span></div>
- </div>
+  <div class="hwb-grid">
+    <div>
+      <div class="title">HWB <small style="font-size:10px;">Verbrauch</small></div>
+      <div class="value" id="hwbv">0 kWh/m²a</div>
+    </div>
+    <div>
+      <div class="title">Energiebedarf</div>
+      <div class="value" id="enb">0 kWh</div>
+    </div>
+    <div>
+      <div class="title">BGF</div>
+      <div class="value" id="bgf2">0 m²</div>
+    </div>
+  </div>
 </div>
 
-<div class="hwb-values">
- <div>HWB<sub>korrigiert</sub>: <span id="hwbk">0</span></div>
- <div>Ziel Raumwärme: 20°C</div>
- <div>Ziel Warmwasser: 55°C</div>
+<div style="display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-top:8px; text-align:center;">
+  <div>HWB<sub>korrigiert</sub>: <strong id="hwbk">0</strong></div>
+  <div>Ziel Raumwärme: <strong>20°C</strong></div>
+  <div>Ziel Warmwasser: <strong>55°C</strong></div>
 </div>
 
 <button class="print-btn" onclick="window.print()">Drucken</button>
 
 <script>
-// ------------------------------------------------------
-// DOM-Referenzen
-// ------------------------------------------------------
-const wnf = document.getElementById("wnf");
-const beh = document.getElementById("beh");
-const bgf = document.getElementById("bgf");
-const pers = document.getElementById("pers");
-const rt = document.getElementById("rt");
+// ---------------- DOM references ----------------
+const wnf = document.getElementById('wnf');
+const beh = document.getElementById('beh');
+const bgf = document.getElementById('bgf');
+const pers = document.getElementById('pers');
+const rt = document.getElementById('rt');
 
-const hzInput = document.getElementById("hz");  // <-- umbenannt!
-const jng = document.getElementById("jng");
-const ffa = document.getElementById("ffa");
-const sol = document.getElementById("sol");
-const solkwh = document.getElementById("solkwh");
-const solblock = document.getElementById("solblock");
+const hzInput = document.getElementById('hz');
+const jng = document.getElementById('jng');
 
-// Einträge
-const outPV = document.getElementById("pv");
-const barPV = document.getElementById("pvb");
-const outIG = document.getElementById("ig");
-const barIG = document.getElementById("igb");
-const outSG = document.getElementById("sg");
-const barSG = document.getElementById("sgb");
-const outHE = document.getElementById("he");   // Ausgabe
-const barHE = document.getElementById("heb");
-const sumEin = document.getElementById("sumEin");
-const sumEinB = document.getElementById("sumEinB");
+const ffa = document.getElementById('ffa'); // slider for windows
+const ffaLabel = document.getElementById('ffaLabel');
 
-// Verluste
-const outWB = document.getElementById("wb");
-const barWB = document.getElementById("wbb");
-const outLF = document.getElementById("lf");
-const barLF = document.getElementById("lfb");
-const outANL = document.getElementById("anl");
-const barANL = document.getElementById("anlb");
-const outWWL = document.getElementById("wwl");
-const barWWL = document.getElementById("wwlb");
-const wwlossblock = document.getElementById("wwlossblock");
+const sol = document.getElementById('sol');
+const solblock = document.getElementById('solblock');
+const solkwh = document.getElementById('solkwh');
 
-const outBT = document.getElementById("bt");
-const barBT = document.getElementById("btb");
-const sumVer = document.getElementById("sumVer");
-const sumVerB = document.getElementById("sumVerB");
+// entries outputs
+const outPV = document.getElementById('pv');
+const barPV = document.getElementById('pvb');
+const pvBlock = document.getElementById('pvblock');
 
-// HWB
-const hwbv = document.getElementById("hwbv");
-const enb = document.getElementById("enb");
-const bgf2 = document.getElementById("bgf2");
-const hwbk = document.getElementById("hwbk");
+const outIG = document.getElementById('ig');
+const barIG = document.getElementById('igb');
 
-// ------------------------------------------------------
-// Hauptberechnung
-// ------------------------------------------------------
-function calc() {
+const outSG = document.getElementById('sg');
+const barSG = document.getElementById('sgb');
 
-    // Eingabewerte
-    const wnfV = +wnf.value;
-    const behV = +beh.value / 100;
-    const persV = +pers.value;
-    const rtV = +rt.value;
-    const hzV = +hzInput.value;      // <-- korrigiert
-    const jngV = +jng.value;
+const outHE = document.getElementById('he');
+const barHE = document.getElementById('heb');
 
-    // BGF
-    const bg = wnfV * 1.25;
-    bgf.value = bg.toFixed(0);
-    bgf2.innerHTML = bg.toFixed(0);
+const sumEin = document.getElementById('sumEin');
+const sumEinB = document.getElementById('sumEinB');
 
-    // Korrekturfaktor Raumwärme
-    const kr = 1 + ((rtV - 20) * 0.02);
-    document.getElementById("krw").value = kr.toFixed(2);
+// losses outputs
+const outWB = document.getElementById('wb');
+const barWB = document.getElementById('wbb');
 
-    // Korrektur beheizte Fläche
-    const kbfV = behV;
-    document.getElementById("kbf").value = kbfV.toFixed(2);
+const outLF = document.getElementById('lf');
+const barLF = document.getElementById('lfb');
 
-    // ---------------------------
-    // Einträge
-    // ---------------------------
-    const pvV = (sol.value === "ja" ? +solkwh.value : 0);
-    const igV = persV * 500;
-    const sgV = (ffa.value === "hoch" ? 600 : ffa.value === "mittel" ? 400 : 200);
-    const heV = hzV * jngV;
+const outANL = document.getElementById('anl');
+const barANL = document.getElementById('anlb');
 
-    outPV.innerHTML = pvV;
-    outIG.innerHTML = igV;
-    outSG.innerHTML = sgV;
-    outHE.innerHTML = heV.toFixed(0);
+const outWWL = document.getElementById('wwl');
+const barWWL = document.getElementById('wwlb');
+const wwlossblock = document.getElementById('wwlossblock');
 
-    const sumE = pvV + igV + sgV + heV;
-    sumEin.innerHTML = sumE.toFixed(0);
+const outBT = document.getElementById('bt');
+const barBT = document.getElementById('btb');
 
-    // ---------------------------
-    // Verluste
-    // ---------------------------
-    const wbV = bg * 2.1;
-    const lfV = bg * 1.6;
-    const anlV = heV * 0.1;
-    const btV = bg * 3.2;
+const sumVer = document.getElementById('sumVer');
+const sumVerB = document.getElementById('sumVerB');
 
-    const wwlV = (document.getElementById("ww").value === "inkl" ? persV * 500 : 0);
-    wwlossblock.style.display = (wwlV > 0 ? "block" : "none");
+// HWB outputs
+const hwbvOut = document.getElementById('hwbv');
+const enbOut = document.getElementById('enb');
+const bgf2Out = document.getElementById('bgf2');
+const hwbkOut = document.getElementById('hwbk');
 
-    outWB.innerHTML = wbV.toFixed(0);
-    outLF.innerHTML = lfV.toFixed(0);
-    outANL.innerHTML = anlV.toFixed(0);
-    outBT.innerHTML = btV.toFixed(0);
-    outWWL.innerHTML = wwlV.toFixed(0);
-
-    const sumL = wbV + lfV + anlV + btV + wwlV;
-    sumVer.innerHTML = sumL.toFixed(0);
-
-    // ---------------------------
-    // Balken skalieren
-    // ---------------------------
-    const maxEin = Math.max(sumE, 1);
-    const maxVer = Math.max(sumL, 1);
-
-    const bar = (el, v, max) => el.style.width = (v / max * 100) + "%";
-
-    bar(barPV, pvV, maxEin);
-    bar(barIG, igV, maxEin);
-    bar(barSG, sgV, maxEin);
-    bar(barHE, heV, maxEin);
-    bar(sumEinB, sumE, sumE);
-
-    bar(barWB, wbV, maxVer);
-    bar(barLF, lfV, maxVer);
-    bar(barANL, anlV, maxVer);
-    bar(barBT, btV, maxVer);
-    bar(barWWL, wwlV, maxVer);
-    bar(sumVerB, sumL, sumL);
-
-    // ---------------------------
-    // Heizwärmebedarf
-    // ---------------------------
-    hwbv.innerHTML = (heV / bg).toFixed(1);
-    enb.innerHTML = (sumE / bg).toFixed(1);
-    hwbk.innerHTML = (sumL / bg).toFixed(1);
+function mapFFAtoKwh(v){
+  // v 0..100 => 3000 .. 10000
+  return 3000 + (v/100) * (10000 - 3000);
 }
 
-// ------------------------------------------------------
-// Event Listener
-// ------------------------------------------------------
-document.querySelectorAll("input, select").forEach(el =>
-    el.addEventListener("input", calc)
-);
+function updateFFALabel(){
+  const v = +document.getElementById('ffa').value;
+  const kwh = Math.round(mapFFAtoKwh(v));
+  let text = 'mittel';
+  if (v < 33) text = 'niedrig';
+  else if (v > 66) text = 'hoch';
+  ffaLabel.innerText = text + ' — ' + kwh.toLocaleString() + ' kWh';
+}
 
-sol.addEventListener("change", () => {
-    solblock.style.display = sol.value === "ja" ? "block" : "none";
-    calc();
-});
+// main calculation
+function calc(){
+  const wnfV = Number(wnf.value) || 0;
+  const behPct = Number(beh.value) || 0; // 0-100
+  const persV = Number(pers.value) || 0;
+  const rtV = Number(rt.value) || 20;
+  const hzV = Number(hzInput.value) || 0;
+  const jngV = Number(jng.value) || 0.85;
 
-// Start
+  // BGF
+  const bgfVal = wnfV * 1.25;
+  bgf.value = Math.round(bgfVal);
+  bgf2Out.innerText = Math.round(bgfVal);
+
+  // Korrekturfaktoren
+  const kr = ((rtV - 20) * 6 / 100) + 1; // (T-20)*6/100 +1
+  document.getElementById('krw').value = kr.toFixed(3);
+
+  const kbf = ((behPct - 100) * 0.5 / 100) + 1; // (beheizt-100)*0.5/100 +1
+  document.getElementById('kbf').value = kbf.toFixed(3);
+
+  // Fensterflächen -> map slider to kWh
+  const ffaVal = Number(document.getElementById('ffa').value) || 50;
+  const sgKwh = Math.round(mapFFAtoKwh(ffaVal));
+
+  // PV only if sol yes
+  const solYes = sol.value === 'ja';
+  pvBlock.style.display = solYes ? 'block' : 'none';
+  const pvV = solYes ? Number(solkwh.value) || 0 : 0;
+
+  // Interne Gewinne = 250 * pers + 750
+  const igV = persV * 250 + 750;
+
+  // Solare Gewinne
+  const sgV = sgKwh;
+
+  // Heizenergie (eingabe)
+  const heInput = hzV;
+
+  // Summe Einträge
+  const sumE = pvV + igV + sgV + heInput;
+
+  // OUTPUT Einträge
+  outPV.innerText = pvV.toFixed(0);
+  outIG.innerText = igV.toFixed(0);
+  outSG.innerText = sgV.toFixed(0);
+  outHE.innerText = heInput.toFixed(0);
+  sumEin.innerText = sumE.toFixed(0);
+
+  // Verluste:
+  // Wärmebrücken: 5 kWh/m2 * BGF
+  const wbV = bgfVal * 5;
+
+  // Lüftung: 5 kWh/m2 * BGF * 3
+  const lfV = bgfVal * 5 * 3;
+
+  // Anlage: Heizenergie - Heizenergie * JNG
+  const anlV = heInput - (heInput * jngV);
+
+  // Warmwasser: 1000 kWh * Personen (only if inkl.)
+  const wwv = (document.getElementById('ww').value === 'inkl') ? persV * 1000 : 0;
+  wwlossblock.style.display = wwv > 0 ? 'block' : 'none';
+
+  // Bauteile = SummeEinträge - (wb + lf + anl + wwv)
+  const btV = sumE - (wbV + lfV + anlV + wwv);
+
+  // OUTPUT Verluste
+  outWB.innerText = Math.round(wbV);
+  outLF.innerText = Math.round(lfV);
+  outANL.innerText = Math.round(anlV);
+  outWWL.innerText = Math.round(wwv);
+  outBT.innerText = Math.round(btV);
+
+  const sumL = wbV + lfV + anlV + wwv + btV;
+  sumVer.innerText = Math.round(sumL);
+
+  // Bars scaling
+  const maxE = Math.max(sumE, 1);
+  const maxL = Math.max(sumL, 1);
+
+  const setBar = (el, value, max) => {
+    el.style.width = (value / max * 100) + '%';
+  };
+
+  setBar(barPV, pvV, maxE);
+  setBar(barIG, igV, maxE);
+  setBar(barSG, sgV, maxE);
+  setBar(barHE, heInput, maxE);
+  setBar(sumEinB, sumE, sumE);
+
+  setBar(barWB, wbV, maxL);
+  setBar(barLF, lfV, maxL);
+  setBar(barANL, anlV, maxL);
+  setBar(barWWL, wwv, maxL);
+  setBar(barBT, btV, maxL);
+  setBar(sumVerB, sumL, sumL);
+
+  // HWB
+  // HWB Verbrauch: (Heizenergie * JNG - Warmwasser)/BGF
+  const hwbVerbrauch = ((heInput * jngV) - wwv) / (bgfVal || 1);
+  hwbvOut.innerText = hwbVerbrauch.toFixed(0) + ' kWh/m²a';
+
+  // HWB korrigiert
+  const hwbKorr = hwbVerbrauch / kr / kbf;
+  hwbkOut.innerText = Math.round(hwbKorr);
+
+  // Energiebedarf als Summe Einträge (mittlerer balken)
+  enbOut.innerText = Math.round(sumE) + ' kWh';
+}
+
+// wire events
+document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', () => {
+  if (el.id === 'beh') {
+    document.getElementById('behLabel').innerText = el.value + '%';
+  }
+  if (el.id === 'ffa') updateFFALabel();
+  calc();
+}));
+
+// init
+updateFFALabel();
 calc();
 </script>
+</body>
+</html>
