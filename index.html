@@ -112,14 +112,15 @@
 
 <script>
 // ------------------------------------------------------
-// DOM-Elemente sauber referenzieren (Pflicht ab 2023)
+// DOM-Referenzen
 // ------------------------------------------------------
 const wnf = document.getElementById("wnf");
 const beh = document.getElementById("beh");
 const bgf = document.getElementById("bgf");
 const pers = document.getElementById("pers");
 const rt = document.getElementById("rt");
-const hz = document.getElementById("hz");
+
+const hzInput = document.getElementById("hz");  // <-- umbenannt!
 const jng = document.getElementById("jng");
 const ffa = document.getElementById("ffa");
 const sol = document.getElementById("sol");
@@ -127,29 +128,30 @@ const solkwh = document.getElementById("solkwh");
 const solblock = document.getElementById("solblock");
 
 // Einträge
-const pv = document.getElementById("pv");
-const pvb = document.getElementById("pvb");
-const ig = document.getElementById("ig");
-const igb = document.getElementById("igb");
-const sg = document.getElementById("sg");
-const sgb = document.getElementById("sgb");
-const he = document.getElementById("he");
-const heb = document.getElementById("heb");
+const outPV = document.getElementById("pv");
+const barPV = document.getElementById("pvb");
+const outIG = document.getElementById("ig");
+const barIG = document.getElementById("igb");
+const outSG = document.getElementById("sg");
+const barSG = document.getElementById("sgb");
+const outHE = document.getElementById("he");   // Ausgabe
+const barHE = document.getElementById("heb");
 const sumEin = document.getElementById("sumEin");
 const sumEinB = document.getElementById("sumEinB");
 
 // Verluste
-const wb = document.getElementById("wb");
-const wbb = document.getElementById("wbb");
-const lf = document.getElementById("lf");
-const lfb = document.getElementById("lfb");
-const anl = document.getElementById("anl");
-const anlb = document.getElementById("anlb");
-const wwl = document.getElementById("wwl");
-const wwlb = document.getElementById("wwlb");
+const outWB = document.getElementById("wb");
+const barWB = document.getElementById("wbb");
+const outLF = document.getElementById("lf");
+const barLF = document.getElementById("lfb");
+const outANL = document.getElementById("anl");
+const barANL = document.getElementById("anlb");
+const outWWL = document.getElementById("wwl");
+const barWWL = document.getElementById("wwlb");
 const wwlossblock = document.getElementById("wwlossblock");
-const bt = document.getElementById("bt");
-const btb = document.getElementById("btb");
+
+const outBT = document.getElementById("bt");
+const barBT = document.getElementById("btb");
 const sumVer = document.getElementById("sumVer");
 const sumVerB = document.getElementById("sumVerB");
 
@@ -169,9 +171,8 @@ function calc() {
     const behV = +beh.value / 100;
     const persV = +pers.value;
     const rtV = +rt.value;
-    const hzV = +hz.value;
+    const hzV = +hzInput.value;      // <-- korrigiert
     const jngV = +jng.value;
-    const solUse = sol.value;
 
     // BGF
     const bg = wnfV * 1.25;
@@ -187,38 +188,37 @@ function calc() {
     document.getElementById("kbf").value = kbfV.toFixed(2);
 
     // ---------------------------
-    // Einträge (extrem vereinfachtes Modell)
+    // Einträge
     // ---------------------------
-    const pvV = (solUse === "ja" ? +solkwh.value : 0);
+    const pvV = (sol.value === "ja" ? +solkwh.value : 0);
     const igV = persV * 500;
     const sgV = (ffa.value === "hoch" ? 600 : ffa.value === "mittel" ? 400 : 200);
     const heV = hzV * jngV;
 
-    pv.innerHTML = pvV;
-    ig.innerHTML = igV;
-    sg.innerHTML = sgV;
-    he.innerHTML = heV.toFixed(0);
+    outPV.innerHTML = pvV;
+    outIG.innerHTML = igV;
+    outSG.innerHTML = sgV;
+    outHE.innerHTML = heV.toFixed(0);
 
     const sumE = pvV + igV + sgV + heV;
     sumEin.innerHTML = sumE.toFixed(0);
 
     // ---------------------------
-    // Verluste (stark vereinfachtes Modell)
+    // Verluste
     // ---------------------------
     const wbV = bg * 2.1;
     const lfV = bg * 1.6;
     const anlV = heV * 0.1;
     const btV = bg * 3.2;
 
-    // Warmwasser nur wenn "inkl"
     const wwlV = (document.getElementById("ww").value === "inkl" ? persV * 500 : 0);
     wwlossblock.style.display = (wwlV > 0 ? "block" : "none");
 
-    wb.innerHTML = wbV.toFixed(0);
-    lf.innerHTML = lfV.toFixed(0);
-    anl.innerHTML = anlV.toFixed(0);
-    bt.innerHTML = btV.toFixed(0);
-    wwl.innerHTML = wwlV.toFixed(0);
+    outWB.innerHTML = wbV.toFixed(0);
+    outLF.innerHTML = lfV.toFixed(0);
+    outANL.innerHTML = anlV.toFixed(0);
+    outBT.innerHTML = btV.toFixed(0);
+    outWWL.innerHTML = wwlV.toFixed(0);
 
     const sumL = wbV + lfV + anlV + btV + wwlV;
     sumVer.innerHTML = sumL.toFixed(0);
@@ -226,46 +226,44 @@ function calc() {
     // ---------------------------
     // Balken skalieren
     // ---------------------------
-    function bar(el, value, max) {
-        el.style.width = (value / max * 100) + "%";
-    }
     const maxEin = Math.max(sumE, 1);
     const maxVer = Math.max(sumL, 1);
 
-    bar(pvb, pvV, maxEin);
-    bar(igb, igV, maxEin);
-    bar(sgb, sgV, maxEin);
-    bar(heb, heV, maxEin);
-    bar(sumEinB, sumE, sumE); // Summe = 100 %
+    const bar = (el, v, max) => el.style.width = (v / max * 100) + "%";
 
-    bar(wbb, wbV, maxVer);
-    bar(lfb, lfV, maxVer);
-    bar(anlb, anlV, maxVer);
-    bar(btb, btV, maxVer);
-    bar(wwlb, wwlV, maxVer);
-    bar(sumVerB, sumVer.innerHTML, sumVer.innerHTML); // Summe = 100 %
+    bar(barPV, pvV, maxEin);
+    bar(barIG, igV, maxEin);
+    bar(barSG, sgV, maxEin);
+    bar(barHE, heV, maxEin);
+    bar(sumEinB, sumE, sumE);
+
+    bar(barWB, wbV, maxVer);
+    bar(barLF, lfV, maxVer);
+    bar(barANL, anlV, maxVer);
+    bar(barBT, btV, maxVer);
+    bar(barWWL, wwlV, maxVer);
+    bar(sumVerB, sumL, sumL);
 
     // ---------------------------
     // Heizwärmebedarf
     // ---------------------------
-    hwbv.innerHTML = (heV / bg).toFixed(1); // Verbrauch
-    enb.innerHTML = (sumE / bg).toFixed(1); // Energiebedarf
-    hwbk.innerHTML = (sumL / bg).toFixed(1); // korrigiert
+    hwbv.innerHTML = (heV / bg).toFixed(1);
+    enb.innerHTML = (sumE / bg).toFixed(1);
+    hwbk.innerHTML = (sumL / bg).toFixed(1);
 }
 
 // ------------------------------------------------------
-// Event-Listener
+// Event Listener
 // ------------------------------------------------------
-document.querySelectorAll("input, select").forEach(el => {
-    el.addEventListener("input", calc);
-});
+document.querySelectorAll("input, select").forEach(el =>
+    el.addEventListener("input", calc)
+);
 
-// Solare Nutzung sichtbar/unsichtbar
 sol.addEventListener("change", () => {
-    solblock.style.display = (sol.value === "ja" ? "block" : "none");
+    solblock.style.display = sol.value === "ja" ? "block" : "none";
     calc();
 });
 
-// Startberechnung
+// Start
 calc();
 </script>
