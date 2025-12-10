@@ -23,7 +23,46 @@
  .hwb-grid .title { font-size:12px; font-weight:700; }
  .hwb-grid .value { font-size:18px; font-weight:700; }
  .print-btn{ margin-top:16px; padding:10px; font-size:14px; cursor:pointer; }
- @media print { .print-btn{display:none;} body{margin:0;} }
+ /* @media print { .print-btn{display:none;} body{margin:0;} }
+ /* ----------------------------------------------------
+   PRINT FIX – Farben, Balken & Diagramme erzwingen
+----------------------------------------------------- */
+@media print {
+
+  /* Farben & Hintergründe im Druck aktivieren */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Sicherheitsfallback für Balken */
+  .bar-bg {
+    background: #ccc !important;
+  }
+
+  .bar-fill {
+    background: #3ABDC4 !important;
+  }
+
+  .bar-fill-loss {
+    background: #E58A8A !important;
+  }
+
+  /* Farbbox HWB */
+  .hwb-box {
+    background: #3ABDC4 !important;
+    color: white !important;
+  }
+
+  /* Farbiger HWB-Balken unten */
+  #sumEinB {
+    background: #3ABDC4 !important;
+  }
+  #sumVerB {
+    background: #E58A8A !important;
+  }
+}
 </style>
 </head>
 <body>
